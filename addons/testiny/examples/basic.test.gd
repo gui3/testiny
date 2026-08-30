@@ -1,4 +1,7 @@
-extends Testiny.Test
+@tool extends Testiny.TestSuite
+
+func setup() -> void:
+	is_headless = true
 
 func it_should_succeed():
 	print("succeed tutut")
@@ -7,4 +10,8 @@ func it_should_succeed():
 
 func it_should_fail():
 	print("fail pouet pouet")
-	OS.crash("failed")
+	assert(1 == 4)
+
+func it_should_crash():
+	print("crash tut tut")
+	OS.crash("coucou")

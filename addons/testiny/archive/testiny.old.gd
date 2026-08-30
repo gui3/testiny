@@ -1,6 +1,6 @@
 @tool
 extends EditorScript
-class_name Testiny
+class_name TestinyOld
 
 # --- CODES
 
@@ -10,9 +10,10 @@ enum Status {
 	# (mask | code) == mask -> inverse mask (all 0s are 0)
 	OK =      0b000, # code 0 == OK
 	FAILED =  0b001,
+	EXPIRED = 0b010,
 	DONE =    0b011, # inverse mask
 	
-	# mask & code != 0 -> mask (all 1s are 1s)
+	# (mask & code) != 0 -> mask (all 1s are 1s)
 	NOT_DONE = 0b100, # mask
 	INIT =     0b101,
 	RUNNING =  0b110,
@@ -22,6 +23,9 @@ var status_string: Dictionary[Status, String] = {
 	Status.RUNNING: "RUNNING",
 	Status.OK: "OK",
 	Status.FAILED: "FAILED",
+	Status.EXPIRED: "EXPIRED",
+	Status.DONE: "DONE",
+	Status.NOT_DONE: "NOT DONE",
 }
 
 # --- UTILITIES
@@ -39,23 +43,23 @@ static func plan(miliseconds: int, callback: Callable) -> void:
 class SubProcess:
 	extends RefCounted
 	
-	var status: Status = Status.INIT
 	var pid: int = -1
 	var stdio: FileAccess
 	var stderr: FileAccess
-	var is_expired: bool = false
 	var exit_code: int = -1
+	var is_done: bool = false
 	
 	signal stdio_emitted(data: String)
 	signal stderr_emitted(data: String)
 	signal exited(code: int)
 	
-	func expire():
-		is_expired = true
-		terminate()
-	
-	func terminate():
+	func terminate() -> int:
+		print("terminate")
+		exit_code = OS.get_process_exit_code(pid)
 		OS.kill(pid)
+		is_done = true
+		exited.emit(exit_code)
+		return exit_code
 	
 	func free() -> void:
 		terminate()
@@ -75,36 +79,29 @@ class SubProcess:
 				var line = stderr.get_line()
 				#output_text += line + "\n"
 				printerr(" [Child error] " + line)
+				stderr_emitted.emit(line)
 	
-	func _run(command: String, args: PackedStringArray = [], timeout: int = 10000):
+	func _run(command: String, args: PackedStringArray = [], timeout: float = 10.0) -> int:
 		var info: Dictionary = OS.execute_with_pipe(command, args, false)
 		if info.is_empty():
 			push_error("❌ Error while starting sub process")
-			return
+			return 1
 		pid = info.get("pid")
 		stdio = info.get("stdio")
 		stderr = info.get("stderr")
-		status = Status.RUNNING
 		
 		# timeout
-		is_expired = false
-		Testiny.plan(timeout, expire)
+		var expires_at: int = Time.get_unix_time_from_system() + timeout
 		
-		while not is_expired and OS.is_process_running(pid):
+		while not is_done and OS.is_process_running(pid) and Time.get_unix_time_from_system() < expires_at:
 			read_stdio(stdio)
 			read_stderr(stderr)
-			OS.delay_msec(10)
+			OS.delay_msec(50)
 		read_stdio(stdio)
 		read_stderr(stderr)
+		print("end exit code", OS.get_process_exit_code(pid))
 
-		# Récupération du code de sortie final
-		exit_code = OS.get_process_exit_code(pid)
-		exited.emit(exit_code)
-		if exit_code == 0:
-			status = Status.OK
-		else:
-			status = Status.FAILED
-		terminate() # just in case
+		return terminate() # just in case
 
 # --- GLOBAL MANAGER
 
@@ -123,12 +120,13 @@ static func discover(extension: String = ".test.gd", root_dir: String = "res://"
 	return files
 
 static func run_file(file_path: String) -> void:
+	print("running file %s" % file_path)
 	if FileAccess.file_exists(file_path):
 		var script: Resource = load(file_path)
-		var instance = script.new()
+		var instance = script.new(true) as Test
 		
-		if instance is Testiny.Test:
-			instance.__is_sub = true
+		if instance and instance is Test:
+			instance.__is_main = true
 			await instance._run()
 			if instance is Node: instance.free()
 		else: 
@@ -157,8 +155,17 @@ class Phase:
 	var process: SubProcess = null
 	var exit_code: int = -1 # sub-process exit code
 	var status: int = Status.INIT
-	var children: Array[Phase] = []
-	var parent: Phase = null
+	var logs: String = ""
+	var errors: String = ""
+	
+	func log(text) -> void:
+		logs += text
+	
+	func fail(text) -> void:
+		status = Status.FAILED
+		errors += text
+		if process is SubProcess:
+			process.terminate()
 
 ## -- main test file type
 
@@ -166,17 +173,10 @@ class Phase:
 	extends SceneTree
 	
 	signal __phase_ended(phase: Phase)
-	signal __suite_ended()
-	
-	## OVERWRITE miliseconds before closing each test
-	var timeout: int = 10000
-	## OVERWRITE if true, all tests are executed simultaneously
-	var is_asynchronous: bool = false
-	## OVERWRITE if true, executed with a hidden interface
-	var is_headless: bool = false
+	signal __suite_ended(phases: Array[Phase])
 	
 	## DO NOT OVERWRITE
-	var __is_sub: bool = false
+	var __is_main: bool = false
 	## DO NOT OVERWRITE
 	var __phases: Array[Phase] = []
 	## DO NOT OVERWRITE
@@ -186,13 +186,13 @@ class Phase:
 	## DO NOT OVERWRITE path to godot executable
 	static var __godot_path: String = OS.get_executable_path()
 
-	func __phase_done() -> void:
-		#__nb_phases_done += 1
-		if __check_suite_done():
-			__suite_ended.emit()
+	func __phase_done(phase: Phase) -> void:
+		print("phase ended: %s" % phase.description)
+		if __is_main and __check_suite_done():
+			__suite_done()
 
 	func __check_suite_done() -> bool:
-		return __phases.all(func(phase): return not OS.is_process_running(phase.pid))
+		return __phases.all(func(phase: Phase): return phase.process.is_done)
 	
 	func __suite_done() -> void:
 		# get the global code
@@ -201,22 +201,26 @@ class Phase:
 			if phase.status != Status.OK:
 				code = phase.status
 		__exit_code = code
-		if __is_sub:
+		__suite_ended.emit(__phases)
+		if not __is_main:
 			print("quitting")
 			quit(__exit_code)
-
-	
-	func _init() -> void:
-		__test_path = get_script().get_path()
-		__phase_ended.connect(__phase_done)
-		__suite_ended.connect(__suite_done)
 	
 	## --- OVERRIDABLES
 	
+	## OVERWRITE miliseconds before closing each test
+	var timeout: int = 10.0
+	## OVERWRITE if true, all tests are executed simultaneously
+	var is_asynchronous: bool = false
+	## OVERWRITE if true, executed with a hidden interface
+	var is_headless: bool = false
+	
+	## OVERRIDE hook for positionning execution config
+	func setup() -> void: pass
 	## OVERRIDE hook executed before each "it" phase.
-	func _before() -> void: pass
+	func before() -> void: pass
 	## OVERRIDE hook executed after each "it" phase.
-	func _after() -> void: pass
+	func after() -> void: pass
 	
 	## --- CORE FUNCTIONS
 	
@@ -233,6 +237,7 @@ class Phase:
 	
 	## async
 	func __run_phase(phase: Phase) -> void:
+		print("starting phase %s" % phase.description)
 		var phase_args: Array[String] = [
 			"--headless" if is_headless else "",
 			"--script", __test_path,
@@ -240,38 +245,58 @@ class Phase:
 			phase.description,
 		]
 		phase.process = SubProcess.new()
-		phase.process.stdio_emitted.connect(print)
-		phase.process.stderr_emitted.connect(printerr)
-		phase.process._run(__godot_path, phase_args, timeout)
-		var exit_code = await phase.process.exited
-		print("🔚 Process exited with code: %d" % exit_code)
+		phase.process.stdio_emitted.connect(phase.log)
+		phase.process.stderr_emitted.connect(phase.fail)
+		
+		phase.exit_code = await phase.process._run(__godot_path, phase_args, timeout)
+		print("🔚 Process exited with code: %d" % phase.exit_code)
 		__phase_ended.emit(phase)
 	
 	## async
 	func __execute_suite(filter: Array[String] = []) -> void:
 		var is_all: bool = filter.size() == 0
 		var nb_found: int = 0
+		__exit_code = -1
 		var phases: Array[Phase] = __get_phases()
 		for phase in phases:
-			print(phase)
-			print(phase.description)
 			if is_all or filter.has(phase.description):
 				nb_found += 1
-				if is_asynchronous:
-					__run_phase(phase)
+				if not __is_main:
+					__run_test(phase.description)
+					__phase_ended.emit(phase)
 				else:
-					await __run_phase(phase)
+					if is_asynchronous:
+						__run_phase(phase)
+					else:
+						await __run_phase(phase)
 		if not is_all and nb_found != filter.size():
 			push_error("wrong number of phases")
+		if not __is_main:
+			__suite_ended.emit()
+	
+	func __run_test(test_name: String) -> void:
+		before()
+		self[test_name].call()
+		after()
 	
 	## !DO NOT OVERRIDE this function,
 	## call from godot's script launcher
-	func _run() -> void:
+	func _init(is_main: bool = false) -> void:
+		print("running %s" % __test_path)
+		__test_path = get_script().get_path()
+		__phase_ended.connect(__phase_done)
+		__is_main = is_main
+		if not __is_main:
+			_run()
+	
+	func _run() -> int:
+		setup()
 		var cli_arguments: PackedStringArray = OS.get_cmdline_user_args()
-		#print(cli_arguments)
 		if cli_arguments.size() > 0:
 			print("Running tests %s" % cli_arguments)
 		else:
-			print("running full suite %s" % __test_path)
-		var exit_code = 0
+			print("running full suite")
+		
 		__execute_suite(cli_arguments) # async -> signal __suite_ended
+		await __suite_ended
+		return __exit_code
