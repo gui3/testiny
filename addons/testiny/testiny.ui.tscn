@@ -1,0 +1,149 @@
+[gd_scene format=3 uid="uid://drwqxdxb4djur"]
+
+[ext_resource type="Script" uid="uid://d21ymssm3txkj" path="res://testiny.ui.gd" id="1_aot1m"]
+[ext_resource type="Texture2D" uid="uid://c1eilsgc13331" path="res://icon.svg" id="2_aj22d"]
+
+[node name="TestinyUi" type="MarginContainer" unique_id=1856116861]
+custom_minimum_size = Vector2(256, 127)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_aot1m")
+
+[node name="Layout" type="VBoxContainer" parent="." unique_id=85240722]
+layout_mode = 2
+
+[node name="ToolBox" type="HBoxContainer" parent="Layout" unique_id=1330453034]
+layout_mode = 2
+
+[node name="RunAllButton" type="Button" parent="Layout/ToolBox" unique_id=313349686]
+layout_mode = 2
+text = "Run all test (reloads)"
+
+[node name="ReloadButton" type="Button" parent="Layout/ToolBox" unique_id=771285875]
+layout_mode = 2
+text = "Reload test files"
+
+[node name="RootGroup" type="VBoxContainer" parent="Layout/ToolBox" unique_id=2038241950]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="Label" type="Label" parent="Layout/ToolBox/RootGroup" unique_id=692398156]
+layout_mode = 2
+text = "root path"
+
+[node name="TestRootEdit" type="LineEdit" parent="Layout/ToolBox/RootGroup" unique_id=44467904]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+placeholder_text = "res://"
+
+[node name="SuiteMatchGroup" type="VBoxContainer" parent="Layout/ToolBox" unique_id=268172486]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="Label" type="Label" parent="Layout/ToolBox/SuiteMatchGroup" unique_id=1106691777]
+layout_mode = 2
+text = "suite match (files)"
+
+[node name="SuiteMatchEdit" type="LineEdit" parent="Layout/ToolBox/SuiteMatchGroup" unique_id=27727064]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+placeholder_text = "*.test.gd"
+
+[node name="CaseMatchGroup" type="VBoxContainer" parent="Layout/ToolBox" unique_id=656286953]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="Label" type="Label" parent="Layout/ToolBox/CaseMatchGroup" unique_id=21512929]
+layout_mode = 2
+text = "case match (methods)"
+
+[node name="CaseMatchEdit" type="LineEdit" parent="Layout/ToolBox/CaseMatchGroup" unique_id=110317822]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+placeholder_text = "it_*"
+
+[node name="BoolGroup" type="VBoxContainer" parent="Layout/ToolBox" unique_id=197891330]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="IsAsyncButton" type="CheckButton" parent="Layout/ToolBox/BoolGroup" unique_id=1673117322]
+layout_mode = 2
+text = "async"
+
+[node name="IsGraphicButton" type="CheckButton" parent="Layout/ToolBox/BoolGroup" unique_id=253261839]
+layout_mode = 2
+text = "graphics"
+
+[node name="TitleButton" type="Button" parent="Layout/ToolBox" unique_id=2016583676]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Testiny
+v0.1.11"
+flat = true
+alignment = 2
+
+[node name="View" type="MarginContainer" parent="Layout" unique_id=155727707]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HSplit" type="HSplitContainer" parent="Layout/View" unique_id=1015948353]
+layout_mode = 2
+split_offsets = PackedInt32Array(500)
+touch_dragger_enabled = true
+split_offset = 500
+
+[node name="TestTree" type="VBoxContainer" parent="Layout/View/HSplit" unique_id=9074753]
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+
+[node name="Tree" type="Tree" parent="Layout/View/HSplit/TestTree" unique_id=1941667795]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 3
+hide_root = true
+
+[node name="Inspector" type="VBoxContainer" parent="Layout/View/HSplit" unique_id=1218752915]
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+
+[node name="Title" type="HBoxContainer" parent="Layout/View/HSplit/Inspector" unique_id=1964047276]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Layout/View/HSplit/Inspector/Title" unique_id=1148325571]
+layout_mode = 2
+text = "Phase:"
+
+[node name="PhaseNameLabel" type="Label" parent="Layout/View/HSplit/Inspector/Title" unique_id=210646320]
+layout_mode = 2
+text = "[no test selected]"
+
+[node name="StatusIcon" type="TextureRect" parent="Layout/View/HSplit/Inspector/Title" unique_id=210454167]
+layout_mode = 2
+texture = ExtResource("2_aj22d")
+expand_mode = 2
+
+[node name="StatusLabel" type="Label" parent="Layout/View/HSplit/Inspector/Title" unique_id=1636155320]
+layout_mode = 2
+text = "[no status]"
+
+[node name="HSeparator" type="HSeparator" parent="Layout/View/HSplit/Inspector" unique_id=2077899137]
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="Layout/View/HSplit/Inspector" unique_id=1509692252]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Layout/View/HSplit/Inspector" unique_id=836201692]
+layout_mode = 2
+text = "Logs:"
+
+[node name="Logs" type="TextEdit" parent="Layout/View/HSplit/Inspector" unique_id=1983609017]
+layout_mode = 2
+size_flags_vertical = 3
+text = "(...)
+"
+
+[connection signal="pressed" from="Layout/ToolBox/ReloadButton" to="." method="_on_reload_button_pressed"]

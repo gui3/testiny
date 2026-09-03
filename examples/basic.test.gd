@@ -1,4 +1,4 @@
-extends Testiny.TestSuite
+extends ___Testiny_TestSuite
 
 func setup() -> void:
 	is_graphics_on = true
