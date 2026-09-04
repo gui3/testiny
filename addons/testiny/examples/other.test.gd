@@ -6,16 +6,19 @@ func setup() -> void:
 
 func it_should_succeed():
 	print("should success")
-	var a = 1 + 1
-	assert(a == 2) # you can use godot assertions
+	for i in range(15000):
+		print("hello")
 
 func it_should_fail():
 	print("should fail")
 	push_error("Eror humanum est") # you can just push_error 
+	await OS.delay_msec(1000)
+	printerr("pouet")
 
 func it_should_crash():
 	print("should crash")
-	OS.crash("hello from crash test") # if the engine crashes (godot error)
+	var a = []
+	return a[5] # if the engine crashes (godot error)
 
 func it_works_with_expect():
 	expect("siblings").to_equal("siblings")

@@ -2,14 +2,13 @@
 extends EditorPlugin
 
 #const AUTOLOAD_NAME = "Testiny"
-#const AUTOLOAD_PATH = "./testiny.bundle.gd"
-#const Testiny = preload(AUTOLOAD_PATH)
+#const AUTOLOAD_PATH = "./src/testiny.gd"
 
-var ui_scene: PackedScene = preload("./testiny.ui.tscn")
+var ui_scene: PackedScene = preload("./src/ui/testiny.ui.tscn")
 var ui_ref: MarginContainer
 
 func _enter_tree() -> void:
-	# add_autoload_singleton(AUTOLOAD_NAME, AUTOLOAD_PATH)
+	#add_autoload_singleton(AUTOLOAD_NAME, AUTOLOAD_PATH)
 	# quick-run button
 	if ui_ref:
 		remove_control_from_bottom_panel(ui_ref)
@@ -20,8 +19,8 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
-	# remove_autoload_singleton(AUTOLOAD_NAME)
 	if ui_ref:
 		remove_control_from_bottom_panel(ui_ref)
 		ui_ref.queue_free()
+	#remove_autoload_singleton(AUTOLOAD_NAME)
 	print("[Testiny] plugin de-activated")
