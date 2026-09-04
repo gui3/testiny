@@ -20,44 +20,6 @@ signal stdio_emitted(data: String)
 signal stderr_emitted(data: String)
 signal exited(code: int)
 
-## terminate the sub-process
-func terminate() -> void:
-	print("terminate")
-	exit_code = OS.get_process_exit_code(pid)
-	OS.kill(pid)
-	is_done = true
-	exited.emit(exit_code)
-
-## (async)
-func waiting_exit() -> void:
-	if not is_done:
-		await exited
-	return
-
-## OVERRIDE ensures that [method terminate] is called
-## before freeing this [class Object]
-func free() -> void:
-	terminate()
-	super()
-
-## internal method to read the stdio buffer
-func read_stdio(stdio: FileAccess) -> void:
-	if stdio and stdio.is_open() and stdio.get_length() > 0:
-		#var text = stdio.get_line()
-		var text = stdio.get_buffer(stdio.get_length()).get_string_from_utf8()
-		#print(" [Child] " + line)
-		# \r windows, don't care
-		stdio_emitted.emit(text)#.replace("\r", "").replace("\n", ""))
-
-## internal method to read the stderr buffer
-func read_stderr(stderr: FileAccess) -> void:
-	if stderr and stderr.is_open() and stderr.get_length() > 0:
-		has_errors = true
-		#var text = stderr.get_line()
-		var text = stderr.get_buffer(stderr.get_length()).get_string_from_utf8()
-		# \r windows, don't care
-		stderr_emitted.emit(text)#.replace("\r", "").replace("\n", ""))
-
 ## [b][color=orange]! Synchronous (blocking)[/color][/b]
 ## [br]
 ## runs the [param command] with [param args],
@@ -75,8 +37,6 @@ func _running(command: String, args: PackedStringArray = [], p_config := Config.
 	
 	# loop async (otherise it blocks everything)
 	_reading_loop(stdio, stderr)
-	await waiting_exit()
-	_self_reference = null
 
 func _reading_loop(stdio: FileAccess, stderr: FileAccess):
 	# https://github.com/godotengine/godot/issues/65884
@@ -99,3 +59,43 @@ func _reading_loop(stdio: FileAccess, stderr: FileAccess):
 		is_expired = true
 	print("end exit code", OS.get_process_exit_code(pid))
 	terminate()
+	_self_reference = null
+
+
+## internal method to read the stdio buffer
+func read_stdio(stdio: FileAccess) -> void:
+	if stdio and stdio.is_open() and stdio.get_length() > 0:
+		#var text = stdio.get_line()
+		var text = stdio.get_buffer(stdio.get_length()).get_string_from_utf8()
+		#print(" [Child] " + line)
+		# \r windows, don't care
+		stdio_emitted.emit(text)#.replace("\r", "").replace("\n", ""))
+
+## internal method to read the stderr buffer
+func read_stderr(stderr: FileAccess) -> void:
+	if stderr and stderr.is_open() and stderr.get_length() > 0:
+		has_errors = true
+		#var text = stderr.get_line()
+		var text = stderr.get_buffer(stderr.get_length()).get_string_from_utf8()
+		# \r windows, don't care
+		stderr_emitted.emit(text)#.replace("\r", "").replace("\n", ""))
+
+## terminate the sub-process
+func terminate() -> void:
+	print("terminate")
+	exit_code = OS.get_process_exit_code(pid)
+	OS.kill(pid)
+	is_done = true
+	exited.emit(exit_code)
+
+## (async)
+func waiting_exit() -> void:
+	if not is_done:
+		await exited
+	return
+
+## OVERRIDE ensures that [method terminate] is called
+## before freeing this [class Object]
+func free() -> void:
+	terminate()
+	super()

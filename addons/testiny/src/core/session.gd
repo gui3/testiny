@@ -8,6 +8,8 @@ const Recorder = preload("./recorder.gd")
 const Phase = preload("./phase.gd")
 const Suite = preload("./suite.gd")
 
+signal ended()
+
 var config: Config = Config.new()
 var phases: Array[Phase] = []
 var recorder: Recorder = Recorder.new()
@@ -29,6 +31,7 @@ func _load() -> void:
 		print("HELLO")
 		var suite := Suite.new(file, config, file)
 		phases.append(suite)
+		suite.ended.connect(update_status)
 		suite._load()
 
 func _run() -> void:
@@ -42,10 +45,13 @@ func _run() -> void:
 	else:
 		for phase in phases:
 			await phase._run()
-	await waiting_finished()
-	is_done = true
-	self_reference = null
 
-func waiting_finished():
+func update_status():
+	var check: bool = true
 	for phase in phases:
-		await phase.waiting_finished()
+		check = check and phase.is_done
+	if check:
+		is_done = true
+		self_reference = null
+		ended.emit()
+		

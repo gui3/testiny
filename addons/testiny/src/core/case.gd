@@ -4,10 +4,9 @@ extends "./phase.gd"
 
 const SubProcess = preload("./sub_process.gd")
 
-var sub_process: Testiny.SubProcess
+var sub_process: SubProcess
 var suite_path: String
 var method_name: String
-var is_done: bool
 
 func _init(
 	p_description: String,
@@ -32,42 +31,39 @@ func _run():
 	#sub_process.exited.connect(func(code): print("[exited] %s" % code))
 	sub_process.stdio_emitted.connect(recorder.info)
 	sub_process.stderr_emitted.connect(recorder.error)
-	sub_process.exited.connect(recorder.show_exit_code)
+	sub_process.exited.connect(on_sub_process_exit)
 	sub_process.timeout = 5.0
 	
 	var cli_args: Array[String] = [
 		"--headless" if not config.is_graphics_on else "",
 		"--script", suite_path,
 		"--",
-		#___Testiny_TestSuite.CLI_SUB_PROCESS_DETECTION_ARGUMENT,
 		method_name
 	]
 	recorder.verbose("starting sub-process")
-	await sub_process._running(OS.get_executable_path(), cli_args, config)
+	sub_process._running(OS.get_executable_path(), cli_args, config)
+
+func on_sub_process_exit(code: int):
+	print("exit_code: %s" % code)
+	update_status()
+
+func update_status() -> void:
+	if not sub_process.is_done:
+		set_status(Constant.Status.RUNNING)
+		return
+	is_done = true
 	recorder.verbose("sub-process shoudl have exited (or garbage collection error)")
 	recorder.debug("has_errors: %s" % sub_process.has_errors)
 	recorder.debug("exit_code: %s" % sub_process.exit_code)
-	is_done = true
-	updating_status()
-
-## (async)
-func waiting_finished() -> void:
-	if not is_done:
-		await sub_process.waiting_exit()
-	return
-
-## (async)
-func updating_status() -> void:
-	await waiting_finished()
+	
 	if sub_process.exit_code == 0:
 		if sub_process.has_errors:
 			set_status(Constant.Status.FAILED)
-			return
-		set_status(Constant.Status.OK)
-		return
-	if sub_process.is_expired == true:
+		else:
+			set_status(Constant.Status.OK)
+	elif sub_process.is_expired == true:
 		recorder.warning("timeout reached!")
 		set_status(Constant.Status.EXPIRED)
-		return
-	set_status(Constant.Status.CRASHED)
-	return
+	else:
+		set_status(Constant.Status.CRASHED)
+	ended.emit()

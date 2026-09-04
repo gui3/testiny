@@ -7,7 +7,6 @@ const Case = preload("./case.gd")
 var suite_path: String
 var suite: TestSuite
 var cases: Array[Case] = []
-var is_done: bool = false
 
 func _init(
 	p_description: String,
@@ -31,6 +30,7 @@ func _load(file_path = suite_path):
 				if method.name.match(config.method_is_test_match):
 					var case := Case.new(method.name, config, suite_path, method.name)
 					cases.append(case)
+					case.ended.connect(update_status)
 			recorder.info("loaded successfully %s" % suite_path)
 			set_status(Constant.Status.READY)
 	else:
@@ -47,26 +47,26 @@ func _run() -> void:
 			case._run()
 		else:
 			await case._run()
-	await updating_status()
 
 ## (async)
-func updating_status() -> void:
-	await waiting_finished()
+func update_status() -> void:
 	# getting max (worse) status of all tests
 	var result_status: Constant.Status = Constant.Status.OK
 	for case in cases:
 		result_status = max(result_status, case.status)
+	
+	if result_status == Constant.Status.RUNNING:
+		set_status(Constant.Status.RUNNING)
+		return
+	
 	# filter out irrelevant statuses
 	if result_status >= Constant.StatusCategory.CRASHED:
 		set_status(Constant.Status.CRASHED)
 	elif result_status >= Constant.StatusCategory.FAILED:
-		set_status(Constant.Status.FAILED)
-	elif result_status >= Constant.StatusCategory.WAITING:
-		set_status(Constant.Status.RUNNING)
+		set_status(Constant.Status.FAILED)		
 	else:
 		set_status(Constant.Status.OK)
-
-## (async)
-func waiting_finished() -> void:
-	for case in cases:
-		await case.waiting_finished()
+	
+	# if we get here it's over
+	is_done = true
+	ended.emit()

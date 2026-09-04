@@ -7,11 +7,13 @@ const Constant = preload("./constant.gd")
 const Recorder = preload("./recorder.gd")
 
 signal status_updated(status: Constant.Status)
+signal ended()
 
 var description: String
 var config: Config = Config.new()
 var recorder: Recorder
 var status: Constant.Status = Constant.Status.INIT
+var is_done: bool = false
 
 func _init(
 	p_description: String,
@@ -24,7 +26,6 @@ func _init(
 
 @abstract func _run() -> void;
 @abstract func _load() -> void;
-@abstract func waiting_finished() -> void;
 
 func set_status(p_status: Constant.Status):
 	status  = p_status
