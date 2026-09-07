@@ -4,7 +4,12 @@
 Testiny is (another) unit testing utility for Godot.
 It focuses on simplicity and comfort of use.
 
-See images for a look at the interface and an example test suite.
+Take a look at the interface and an example test suite, nothing complex!
+
+![Image of the interface](./doc/testiny_interface.png)
+
+![Image of a test suite](./doc/testiny_suite.png)
+
 
 ## features
 - captures and differentiate warnings (push_warning), failures (push_error, printerr) and engine crashes.
