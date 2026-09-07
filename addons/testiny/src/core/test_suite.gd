@@ -46,7 +46,6 @@ func _parse_cli_arguments() -> Array[String]:
 		var method_name: String = method.name
 		all_method_names.append(method_name)
 	for argument in cli_arguments:
-		print("arg", argument)
 		if all_method_names.has(argument):
 			valid_methods.append(argument)
 		else:
@@ -58,7 +57,7 @@ func _parse_cli_arguments() -> Array[String]:
 func _run_methods(methods: Array[String]) -> void:
 	self_reference = self
 	for method in methods:
-		print("--- running %s" % method)
+		print("------- logs for: %s -------" % method)
 		before()
 		await self[method].call()
 		after()

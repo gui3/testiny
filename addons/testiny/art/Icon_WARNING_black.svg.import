@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://q3nrgl1lk4ab"
-path="res://.godot/imported/Icon_CRASHED_black.svg-b239f58691a7efb71dca4d0b7595fdbf.ctex"
+path="res://.godot/imported/Icon_WARNING_black.svg-6b84f1080a14d27228075f0ece729a0c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/testiny/art/Icon_CRASHED_black.svg"
-dest_files=["res://.godot/imported/Icon_CRASHED_black.svg-b239f58691a7efb71dca4d0b7595fdbf.ctex"]
+source_file="res://addons/testiny/art/Icon_WARNING_black.svg"
+dest_files=["res://.godot/imported/Icon_WARNING_black.svg-6b84f1080a14d27228075f0ece729a0c.ctex"]
 
 [params]
 

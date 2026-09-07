@@ -76,14 +76,19 @@ func to_be_valid() -> bool:
 	var result = _actual.is_instance_valid()
 	return _conclude(result, "", "to be valid")
 
-## checks Array contains value,
+## checks String contains substring,
+## Array contains value,
 ## or Dictionary has key.
 ## [codeblock]
 ## expect([1,2,3]).to_contain(2)
 ## expect({"id":1, name: "tutut"}).to_contain("id")
 ## [/codeblock]
 func to_contain(expected: Variant) -> bool:
-	var result = _actual.has(expected)
+	var result: bool
+	if _actual is String:
+		result = _actual.contains(expected)
+	else:
+		result = _actual.has(expected)
 	return _conclude(result, expected, "to be of class")
 
 ## checks emptyness or Array or Dictionary
@@ -134,7 +139,7 @@ func _conclude(
 		_fail(msg)
 		return false
 	elif not is_silent:
-		print("[Testiny] OK: Confirmed \"%s\" %s%s \"%s\" %s" % [
+		print("[Expect] OK: Confirmed \"%s\" %s%s \"%s\" %s" % [
 			str(_actual), 
 			"NOT " if _is_negated else "",
 			comparison_string,
@@ -145,4 +150,4 @@ func _conclude(
 
 func _fail(message: String) -> void:
 	#errors.append(message)
-	printerr("[Testiny] FAILED: " + message)
+	push_error("[Expect] FAILED: " + message)

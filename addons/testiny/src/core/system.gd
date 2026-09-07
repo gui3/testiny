@@ -9,7 +9,6 @@ static func discover(extension: String = ".test.gd", root_dir: String = "res://"
 	for file in DirAccess.get_files_at(root_dir):
 		if file.match(extension):
 			var file_path: String = "%s%s" % [root_dir, file]
-			print("found %s" % file_path)
 			files.append(file_path)
 	for dir in DirAccess.get_directories_at(root_dir):
 		var dir_path: String = "%s%s" % [root_dir, dir]

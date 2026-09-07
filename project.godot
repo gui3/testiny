@@ -10,8 +10,9 @@ config_version=5
 
 [application]
 
-config/name="Addons sandbox"
+config/name="Testiny"
 config/features=PackedStringArray("4.7", "Forward Plus")
+config/icon="uid://bbiple8kov3bv"
 
 [editor_plugins]
 

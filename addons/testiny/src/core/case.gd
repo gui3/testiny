@@ -7,6 +7,8 @@ const SubProcess = preload("./sub_process.gd")
 var sub_process: SubProcess
 var suite_path: String
 var method_name: String
+var thread: Thread
+var mutex := Mutex.new()
 
 func _init(
 	p_description: String,
@@ -17,53 +19,131 @@ func _init(
 	super(p_description, p_config)
 	suite_path = p_suite_path
 	method_name = p_method_name
+	set_status(Constant.Status.INIT)
+
+func _load() -> void:
+	is_done = false
+	if sub_process:
+		sub_process.terminate()
+		remove_child(sub_process)
+	sub_process = SubProcess.new()
+	sub_process.mutex = mutex
+	add_child(sub_process)
 	set_status(Constant.Status.READY)
 
-func _load() -> void: pass
-
-func _run():
-	is_done = false
+func _run() -> void:
 	recorder.info("Running %s" % [method_name])
 	set_status(Constant.Status.RUNNING)
-	sub_process = SubProcess.new()
-	#sub_process.stdio_emitted.connect(func(data): print("[stdio] %s" % data))
-	#sub_process.stderr_emitted.connect(func(data): print("[stderr] %s" % data))
-	#sub_process.exited.connect(func(code): print("[exited] %s" % code))
-	sub_process.stdio_emitted.connect(recorder.info)
-	sub_process.stderr_emitted.connect(recorder.error)
-	sub_process.exited.connect(on_sub_process_exit)
-	sub_process.timeout = 5.0
-	
+	set_process(true)
+
+func set_status(p_status: Constant.Status) -> void:
+	mutex.lock()
+	super(p_status)
+	mutex.unlock()
+
+func get_status() -> Constant.Status:
+	var result: Constant.Status
+	mutex.lock()
+	result = status
+	mutex.unlock()
+	return result
+
+func start_sup_process() -> void:
+	if sub_process.get_status() != SubProcess.Status.READY:
+		return # looping guard
+	sub_process.set_status(SubProcess.Status.STARTING)
+	set_status(Constant.Status.INIT) # double loop guard
 	var cli_args: Array[String] = [
 		"--headless" if not config.is_graphics_on else "",
 		"--script", suite_path,
 		"--",
 		method_name
 	]
+	if thread and thread.is_alive():
+		print("aiaiai")
+		thread.wait_to_finish()
+	thread = Thread.new()
 	recorder.verbose("starting sub-process")
-	sub_process._running(OS.get_executable_path(), cli_args, config)
+	thread.start(sub_process._run.bind(
+		OS.get_executable_path(),
+		cli_args,
+		config.timeout
+	), 2)
+	set_status(Constant.Status.RUNNING)
 
-func on_sub_process_exit(code: int):
-	print("exit_code: %s" % code)
+func _process(delta: float) -> void:
+	if get_status() == Constant.Status.CANCELLED:
+		set_process(false)
+		pass
+	elif get_status() == Constant.Status.RUNNING:
+		var sub_status: SubProcess.Status
+		if sub_process:
+			# thread safe get_status()
+			sub_status = sub_process.get_status()
+		if sub_status == SubProcess.Status.READY:
+			print("start")
+			start_sup_process()
+			print("started")
+		elif (
+			sub_status == SubProcess.Status.EXPIRED
+			or sub_status == SubProcess.Status.COMPLETED
+			or sub_status == SubProcess.Status.CRASHED
+		):
+			if not is_done:
+				end_sub_process()
+		else:
+			if int(Time.get_unix_time_from_system()) % config.io_delay == 0:
+				thread_get_messages()
+
+func thread_get_messages():
+	var stdio_messages: Array[String] = []
+	var stderr_messages: Array[String] = []
+	mutex.lock()
+	stdio_messages.append_array(sub_process.stdio_messages)
+	sub_process.stdio_messages.clear()
+	stderr_messages.append_array(sub_process.stderr_messages)
+	sub_process.stderr_messages.clear()
+	mutex.unlock()
+	for message in stdio_messages:
+		recorder.info(message)
+	for message in stderr_messages:
+		recorder.error(message)
+
+func end_sub_process():
+	set_process(false)
+	is_done = true
+	set_status(Constant.Status.INIT)
+	thread_get_messages()
 	update_status()
 
 func update_status() -> void:
-	if not sub_process.is_done:
+	if not is_done:
 		set_status(Constant.Status.RUNNING)
 		return
-	is_done = true
-	recorder.verbose("sub-process shoudl have exited (or garbage collection error)")
+	recorder.info("------- end of test logs -------")
+	
+	var end_status: Constant.Status
+	mutex.lock()
 	recorder.debug("has_errors: %s" % sub_process.has_errors)
 	recorder.debug("exit_code: %s" % sub_process.exit_code)
-	
 	if sub_process.exit_code == 0:
 		if sub_process.has_errors:
-			set_status(Constant.Status.FAILED)
+			end_status = Constant.Status.FAILED
+		elif sub_process.has_warnings:
+			end_status = Constant.Status.WARNING
 		else:
-			set_status(Constant.Status.OK)
+			end_status = Constant.Status.OK
 	elif sub_process.is_expired == true:
-		recorder.warning("timeout reached!")
-		set_status(Constant.Status.EXPIRED)
+		end_status = Constant.Status.EXPIRED
 	else:
-		set_status(Constant.Status.CRASHED)
+		end_status = Constant.Status.CRASHED
+	mutex.unlock()
+	set_status(end_status)
 	ended.emit()
+
+func _notification(what: int) -> void:
+	super(what)
+	if what == NOTIFICATION_EXIT_TREE:
+		if thread and thread.is_alive():
+			thread.wait_to_finish()
+			await get_tree().process_frame

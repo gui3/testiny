@@ -20,7 +20,14 @@ const Case = preload("./core/case.gd")
 const Suite = preload("./core/suite.gd")
 const Session = preload("./core/session.gd")
 
-func _run() -> void:
+func _run(is_all_at_once: bool = false, is_graphics_on: bool = false) -> void:
 	var session := Session.new()
-	await session._load()
-	await session._run()
+	session.config.is_all_at_once = is_all_at_once
+	session.config.is_graphics_on = is_graphics_on
+	add_child(session)
+	session._load()
+	if not session.status == Constant.Status.READY:
+		await session.loaded
+	session._run()
+	if not session.is_done:
+		await session.ended

@@ -38,9 +38,9 @@ func get_log(index: int):
 	]
 
 func get_snapshot():
-	var result: String = ""
+	var result: Array[Array] = []
 	for i in range(levels.size()):
-		result += "%s\n" % format(i)
+		result.append(get_log(i))
 	return result
 
 func filter_level(level: Level) -> Recorder:

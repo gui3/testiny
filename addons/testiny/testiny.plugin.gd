@@ -9,7 +9,6 @@ var ui_ref: MarginContainer
 
 func _enter_tree() -> void:
 	#add_autoload_singleton(AUTOLOAD_NAME, AUTOLOAD_PATH)
-	# quick-run button
 	if ui_ref:
 		remove_control_from_bottom_panel(ui_ref)
 		ui_ref.queue_free()

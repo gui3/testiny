@@ -1,21 +1,17 @@
 extends Testiny.TestSuite
 
-func setup() -> void:
-	is_graphics_on = false
-	timeout = 15.0
-
 func it_should_succeed():
-	print("should success")
 	var a = 1 + 1
 	assert(a == 2) # you can use godot assertions
 
+func it_should_be_warning():
+	push_warning("Eror humanum est") # you can push_warning
+
 func it_should_fail():
-	print("should fail")
-	push_error("Eror humanum est") # you can just push_error 
+	push_error("hello from crash test")
 
 func it_should_crash():
-	print("should crash")
-	OS.crash("hello from crash test") # if the engine crashes (godot error)
+	OS.crash("hello from Testinys") # if your test crashes the engine
 
 func it_works_with_expect():
 	expect("siblings").to_equal("siblings")

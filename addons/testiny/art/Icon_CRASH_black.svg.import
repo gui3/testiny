@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dm5hmjaudnqet"
-path="res://.godot/imported/Icon_WAITING.svg-936715b8adbd6aab815063716172c3f8.ctex"
+uid="uid://dt3bv2x262nhj"
+path="res://.godot/imported/Icon_CRASH_black.svg-07a9fb91b5805d3f0dede3d55f5479e3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/testiny/art/archive/Icon_WAITING.svg"
-dest_files=["res://.godot/imported/Icon_WAITING.svg-936715b8adbd6aab815063716172c3f8.ctex"]
+source_file="res://addons/testiny/art/Icon_CRASH_black.svg"
+dest_files=["res://.godot/imported/Icon_CRASH_black.svg-07a9fb91b5805d3f0dede3d55f5479e3.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwlyytvfo5et1"
-path="res://.godot/imported/Icon_SUCCESS.svg-357f811f4251f6121a4bbfc5a250aa47.ctex"
+uid="uid://cg863ya0y7odf"
+path="res://.godot/imported/Icon_EXPIRED_black.svg-2d45ea81da4a74412272bfbdad627316.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/testiny/art/archive/Icon_SUCCESS.svg"
-dest_files=["res://.godot/imported/Icon_SUCCESS.svg-357f811f4251f6121a4bbfc5a250aa47.ctex"]
+source_file="res://addons/testiny/art/Icon_EXPIRED_black.svg"
+dest_files=["res://.godot/imported/Icon_EXPIRED_black.svg-2d45ea81da4a74412272bfbdad627316.ctex"]
 
 [params]
 
