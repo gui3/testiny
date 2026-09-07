@@ -165,7 +165,7 @@ text = "[ ]"
 
 [node name="Label" type="Label" parent="Layout/View/HSplit/Inspector/Title" unique_id=1148325571]
 layout_mode = 2
-text = "Phase:"
+text = " - "
 
 [node name="PhaseNameLabel" type="Label" parent="Layout/View/HSplit/Inspector/Title" unique_id=210646320]
 layout_mode = 2

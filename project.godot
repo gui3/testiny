@@ -12,7 +12,10 @@ config_version=5
 
 config/name="Testiny"
 config/features=PackedStringArray("4.7", "Forward Plus")
-config/icon="uid://bbiple8kov3bv"
+boot_splash/stretch_mode=5
+boot_splash/use_filter=false
+boot_splash/image="uid://bs1o34ev12bxk"
+config/icon="uid://bs1o34ev12bxk"
 
 [editor_plugins]
 
