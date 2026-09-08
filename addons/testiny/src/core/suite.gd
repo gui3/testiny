@@ -39,7 +39,10 @@ func get_cases() -> void:
 					#add_child(case)
 					case._load()
 					#case.ended.connect(update_status)
-			set_status(Constant.Status.READY)
+			if cases.size() == 0:
+				set_status(Constant.Status.IGNORED)
+			else:
+				set_status(Constant.Status.READY)
 	else:
 		#recorder.warning("error loading test %s" % file_path)
 		set_status(Constant.Status.FILE_NOT_FOUND)

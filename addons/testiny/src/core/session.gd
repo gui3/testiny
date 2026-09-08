@@ -28,14 +28,15 @@ func _init(
 	recorder.verbose("session started")
 
 func _load() -> void:
-	recorder.verbose("loading files %s" % config.test_suite_match)
+	recorder.verbose("loading files %s" % config.test_suite_matches)
 	if thread and thread.is_alive():
 		thread.wait_to_finish()
 	thread = Thread.new()
 	thread.start(func():
 		var thread_files = System.discover(
-			config.test_suite_match,
-			config.test_suite_root_path
+			config.test_suite_matches,
+			config.test_suite_root_path,
+			config.test_suite_excludes
 		)
 		# loading suites and phases
 		var thread_suites: Array[Suite] = []

@@ -22,10 +22,10 @@ enum Status {
 }
 const status_string: Dictionary[int, String] = {
 	Status.OK: "OK", Status.FAILED: "FAILED", Status.EXPIRED: "EXPIRED",
-	Status.CANCELLED: "CANCELLED", Status.CRASHED: "CRASHED",
+	Status.CANCELLED: "CANCELLED", Status.IGNORED: "IGNORED",
 	Status.INIT: "INIT", Status.LOADING: "LOADING", Status.RUNNING: "RUNNING",
 	Status.READY: "READY", Status.FILE_NOT_FOUND: "FILE_NOT_FOUND",
-	Status.WARNING: "WARNING",
+	Status.WARNING: "WARNING", Status.CRASHED: "CRASHED",
 }
 
 ## !! determines the icon from the status

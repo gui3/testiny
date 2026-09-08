@@ -79,21 +79,28 @@ func reset_session() -> Testiny.Session:
 	session.config.is_all_at_once = $Layout/ToolBox/IsAsyncButton.button_pressed
 	session.config.is_graphics_on = $Layout/ToolBox/IsGraphicButton.button_pressed
 	session.config.timeout = $Layout/ToolBox/VBoxContainer/TimeoutInput.value
-	var root_path: String = $Layout/View/HSplit/Config/RootGroup/TestRootEdit.text
+	var root_path: String = $Layout/View/HSplit/Config/VBox/RootGroup/TestRootEdit.text
 	if root_path.length() < 1:
 		root_path = "res://"
 	session.config.test_suite_root_path = root_path
-	var suite_match: String = $Layout/View/HSplit/Config/SuiteMatchGroup/SuiteMatchEdit.text
+	var suite_match: String = $Layout/View/HSplit/Config/VBox/SuiteMatchGroup/SuiteMatchEdit.text
 	if suite_match.length() < 1:
-		suite_match = "*.test.gd"
-	session.config.test_suite_match = suite_match
+		suite_match = ".test.gd"
+	session.config.test_suite_matches = suite_match
+	var excludes: String = $Layout/View/HSplit/Config/VBox/SuiteExcludeGroup/SuiteExcludeEdit.text
+	session.config.test_suite_excludes = excludes
+	var case_match: String = $Layout/View/HSplit/Config/VBox/CaseMatchGroup/CaseMatchEdit.text
+	if case_match.length() < 1:
+		case_match = "it_*"
+	session.config.method_is_test_match = case_match
 	session.count_updated.connect(update_progress.call_deferred)
 	add_child(session)
 	return session
 
 func update_progress(count: int, total: int, details: Dictionary[Testiny.Constant.Status, int]):
 	print("progress %s / %s" % [count, total])
-	$Layout/StatusBar/ProgressBar.value = (count * 100) / (total)
+	if total > 0:
+		$Layout/StatusBar/ProgressBar.value = (count * 100) / (total)
 	for child in $Layout/StatusBar/StatusCountSection.get_children():
 		$Layout/StatusBar/StatusCountSection.remove_child(child)
 	
