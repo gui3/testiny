@@ -133,14 +133,14 @@ func terminate() -> void:
 	exit_code = OS.get_process_exit_code(pid)
 	#_self_reference = null
 	mutex.unlock()
-	OS.kill(pid)
+	if OS.is_process_running(pid):
+		OS.kill(pid)
 	exited.emit.call_deferred(exit_code)
 
 ## OVERRIDE ensures that [method terminate] is called
 ## before freeing this [class Object]
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE:
-		set_status(Status.CANCELLED)
+	if what == NOTIFICATION_EXIT_TREE or what == NOTIFICATION_PREDELETE:
 		terminate()
 		if OS.is_process_running(pid):
 			await exited

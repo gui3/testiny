@@ -5,8 +5,6 @@ extends "./phase.gd"
 const SubProcess = preload("./sub_process.gd")
 
 var sub_process: SubProcess
-var suite_path: String
-var method_name: String
 var thread: Thread
 var mutex := Mutex.new()
 
@@ -16,9 +14,7 @@ func _init(
 	p_suite_path: String,
 	p_method_name: String
 ) -> void:
-	super(p_description, p_config)
-	suite_path = p_suite_path
-	method_name = p_method_name
+	super(p_description, p_config, p_suite_path, p_method_name)
 	set_status(Constant.Status.INIT)
 
 func _load() -> void:
@@ -72,9 +68,11 @@ func start_sup_process() -> void:
 	set_status(Constant.Status.RUNNING)
 
 func _process(delta: float) -> void:
-	if get_status() == Constant.Status.CANCELLED:
+	if get_status() in [Constant.Status.CANCELLED, Constant.Status.IGNORED]:
 		set_process(false)
-		pass
+		is_done = true
+		set_status(get_status())
+		return
 	elif get_status() == Constant.Status.RUNNING:
 		var sub_status: SubProcess.Status
 		if sub_process:
@@ -143,7 +141,10 @@ func update_status() -> void:
 
 func _notification(what: int) -> void:
 	super(what)
-	if what == NOTIFICATION_EXIT_TREE:
+	if what == NOTIFICATION_EXIT_TREE or what == NOTIFICATION_PREDELETE:
 		if thread and thread.is_alive():
+			mutex.lock()
+			sub_process.terminate()
+			mutex.unlock()
 			thread.wait_to_finish()
 			await get_tree().process_frame

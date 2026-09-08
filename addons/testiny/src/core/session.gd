@@ -22,7 +22,7 @@ func _init(
 	p_description: String = "Anonymous session",
 	p_config: Config = Config.new(),
 ) -> void:
-	super(p_description, p_config)
+	super(p_description, p_config, "", "")
 	recorder.info("------- %s v%s -------" % [AppInfo.NAME, AppInfo.VERSION])
 	set_status(Constant.Status.INIT)
 	recorder.verbose("session started")
@@ -109,7 +109,7 @@ func end() -> void:
 	set_process(false)
 	is_done = true
 	#self_reference = null
-	update_status()
+	update_case_count()
 	ended.emit()
 	
 
@@ -122,6 +122,7 @@ func _run() -> void:
 	set_process(true)
 
 func update_case_count() -> void:
+	update_status()
 	var ended_count: int = 0
 	var details: Dictionary[Constant.Status, int] = {}
 	for suite in suites:

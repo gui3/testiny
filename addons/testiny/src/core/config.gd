@@ -11,6 +11,8 @@ var method_is_test_match: String = "it_*"
 ## filter for test suites path,
 ## the difference with test_suite_match is that it doesn't affect discovery
 var test_suite_filter: String = ""
+## filtering cases, syntax: suite//case
+var filter: String = ""
 
 ## if true, show godot interface for each test
 var is_graphics_on: bool = false

@@ -43,6 +43,10 @@ static func get_status_icon(status: Testiny.Constant.Status) -> Texture2D:
 	return i_idle # default (should not go there
 
 func _ready() -> void:
+	$Layout/ToolBox/TitleButton.text = $Layout/ToolBox/TitleButton.text.replace(
+		"__APP_VERSION__",
+		Testiny.AppInfo.VERSION
+	)
 	tree = $Layout/View/HSplit/TestTree/Tree
 	tree.columns = 1
 	reset_details()
@@ -79,17 +83,18 @@ func reset_session() -> Testiny.Session:
 	session.config.is_all_at_once = $Layout/ToolBox/IsAsyncButton.button_pressed
 	session.config.is_graphics_on = $Layout/ToolBox/IsGraphicButton.button_pressed
 	session.config.timeout = $Layout/ToolBox/VBoxContainer/TimeoutInput.value
-	var root_path: String = $Layout/View/HSplit/Config/VBox/RootGroup/TestRootEdit.text
+	session.config.filter = $Layout/ToolBox/FilterSection/LineEdit.text
+	var root_path: String = $Layout/View/HSplit/Config/ScrollContainer/VBox/RootGroup/TestRootEdit.text
 	if root_path.length() < 1:
 		root_path = "res://"
 	session.config.test_suite_root_path = root_path
-	var suite_match: String = $Layout/View/HSplit/Config/VBox/SuiteMatchGroup/SuiteMatchEdit.text
+	var suite_match: String = $Layout/View/HSplit/Config/ScrollContainer/VBox/SuiteMatchGroup/SuiteMatchEdit.text
 	if suite_match.length() < 1:
 		suite_match = ".test.gd"
 	session.config.test_suite_matches = suite_match
-	var excludes: String = $Layout/View/HSplit/Config/VBox/SuiteExcludeGroup/SuiteExcludeEdit.text
+	var excludes: String = $Layout/View/HSplit/Config/ScrollContainer/VBox/SuiteExcludeGroup/SuiteExcludeEdit.text
 	session.config.test_suite_excludes = excludes
-	var case_match: String = $Layout/View/HSplit/Config/VBox/CaseMatchGroup/CaseMatchEdit.text
+	var case_match: String = $Layout/View/HSplit/Config/ScrollContainer/VBox/CaseMatchGroup/CaseMatchEdit.text
 	if case_match.length() < 1:
 		case_match = "it_*"
 	session.config.method_is_test_match = case_match
@@ -143,7 +148,8 @@ func _refresh_tree() -> void:
 			item.set_icon_max_width(0,24)
 			item.set_icon(0, get_status_icon(phase.status))
 			
-			item.add_button(0, i_run, 5, false, "run the full suite", "Run Suite")
+			# button id 0 = run
+			item.add_button(0, i_run, 0, false, "run the full suite", "Run Suite")
 			
 			phase.status_updated.connect(func(status: Testiny.Constant.Status):
 				item.set_icon(0, get_status_icon(status))
@@ -157,7 +163,8 @@ func _refresh_tree() -> void:
 				sub_item.set_icon(0, get_status_icon(phase.status))
 				sub_item.set_text(0, case.description)
 				
-				sub_item.add_button(0, i_run, 5, false, "run this test case", "Run Case")
+				# button id 0 = run
+				sub_item.add_button(0, i_run, 0, false, "run this test case", "Run Case")
 				#sub_item.set_button_disabled(0, 0, true)
 				
 				case.status_updated.connect(func(status: Testiny.Constant.Status):
@@ -227,3 +234,12 @@ func _on_tab_bar_tab_changed(_tab: int) -> void:
 	$Layout/View/HSplit/Config.visible = tab_title == "CONFIG"
 	$Layout/View/HSplit/TestTree.visible = tab_title == "TESTS"
 	$Layout/View/HSplit/Inspector.visible = tab_title == "TESTS"
+
+
+func _on_tree_button_clicked(item: TreeItem, column: int, id: int, mouse_button_index: int) -> void:
+	if item:
+		var phase: Testiny.Phase = item.get_metadata(0)
+		match id:
+			0: # "run" button
+				$Layout/ToolBox/FilterSection/LineEdit.text = phase.locator
+				_run()

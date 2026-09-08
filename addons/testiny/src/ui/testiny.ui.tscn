@@ -103,6 +103,19 @@ alignment = 2
 suffix = "s"
 custom_arrow_step = 1.0
 
+[node name="FilterSection" type="VBoxContainer" parent="Layout/ToolBox" unique_id=770129636]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Layout/ToolBox/FilterSection" unique_id=928832237]
+layout_mode = 2
+text = "filter"
+
+[node name="LineEdit" type="LineEdit" parent="Layout/ToolBox/FilterSection" unique_id=1161583563]
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+placeholder_text = "[suite//case]"
+
 [node name="VSeparator" type="VSeparator" parent="Layout/ToolBox" unique_id=1790281359]
 layout_mode = 2
 
@@ -121,7 +134,7 @@ tab_1/tooltip = "Configure Testiny"
 [node name="TitleButton" type="Button" parent="Layout/ToolBox" unique_id=2016583676]
 layout_mode = 2
 text = "Testiny
-v0.1.11"
+v0.2.0"
 flat = true
 alignment = 2
 
@@ -134,7 +147,6 @@ size_flags_vertical = 3
 
 [node name="HSplit" type="HSplitContainer" parent="Layout/View" unique_id=1015948353]
 layout_mode = 2
-split_offsets = PackedInt32Array(0, 0)
 
 [node name="TestTree" type="VBoxContainer" parent="Layout/View/HSplit" unique_id=9074753]
 custom_minimum_size = Vector2(256, 0)
@@ -182,6 +194,7 @@ bbcode_enabled = true
 threaded = true
 
 [node name="Config" type="MarginContainer" parent="Layout/View/HSplit" unique_id=79511114]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/margin_left = 15
@@ -189,69 +202,72 @@ theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 15
 
-[node name="VBox" type="VBoxContainer" parent="Layout/View/HSplit/Config" unique_id=833081912]
+[node name="ScrollContainer" type="ScrollContainer" parent="Layout/View/HSplit/Config" unique_id=825273341]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="Layout/View/HSplit/Config/VBox" unique_id=1897796575]
+[node name="VBox" type="VBoxContainer" parent="Layout/View/HSplit/Config/ScrollContainer" unique_id=833081912]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Layout/View/HSplit/Config/ScrollContainer/VBox" unique_id=1897796575]
 layout_mode = 2
 text = "Configuration"
 
-[node name="Warning" type="Label" parent="Layout/View/HSplit/Config/VBox" unique_id=1205628347]
+[node name="Warning" type="Label" parent="Layout/View/HSplit/Config/ScrollContainer/VBox" unique_id=1205628347]
 layout_mode = 2
 text = "only change if you're sure of what you're doing"
 
-[node name="HSeparator" type="HSeparator" parent="Layout/View/HSplit/Config/VBox" unique_id=696607390]
+[node name="HSeparator" type="HSeparator" parent="Layout/View/HSplit/Config/ScrollContainer/VBox" unique_id=696607390]
 layout_mode = 2
 
-[node name="RootGroup" type="VBoxContainer" parent="Layout/View/HSplit/Config/VBox" unique_id=2038241950]
+[node name="RootGroup" type="VBoxContainer" parent="Layout/View/HSplit/Config/ScrollContainer/VBox" unique_id=2038241950]
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="Label" type="Label" parent="Layout/View/HSplit/Config/VBox/RootGroup" unique_id=692398156]
+[node name="Label" type="Label" parent="Layout/View/HSplit/Config/ScrollContainer/VBox/RootGroup" unique_id=692398156]
 layout_mode = 2
 text = "root path (only one, use exclude for filtering out)"
 
-[node name="TestRootEdit" type="LineEdit" parent="Layout/View/HSplit/Config/VBox/RootGroup" unique_id=44467904]
+[node name="TestRootEdit" type="LineEdit" parent="Layout/View/HSplit/Config/ScrollContainer/VBox/RootGroup" unique_id=44467904]
 custom_minimum_size = Vector2(125, 0)
 layout_mode = 2
 placeholder_text = "res://"
 
-[node name="SuiteMatchGroup" type="VBoxContainer" parent="Layout/View/HSplit/Config/VBox" unique_id=268172486]
+[node name="SuiteMatchGroup" type="VBoxContainer" parent="Layout/View/HSplit/Config/ScrollContainer/VBox" unique_id=268172486]
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="Label" type="Label" parent="Layout/View/HSplit/Config/VBox/SuiteMatchGroup" unique_id=1106691777]
+[node name="Label" type="Label" parent="Layout/View/HSplit/Config/ScrollContainer/VBox/SuiteMatchGroup" unique_id=1106691777]
 layout_mode = 2
 text = "suite extensions (separate patterns with | )"
 
-[node name="SuiteMatchEdit" type="LineEdit" parent="Layout/View/HSplit/Config/VBox/SuiteMatchGroup" unique_id=27727064]
+[node name="SuiteMatchEdit" type="LineEdit" parent="Layout/View/HSplit/Config/ScrollContainer/VBox/SuiteMatchGroup" unique_id=27727064]
 custom_minimum_size = Vector2(125, 0)
 layout_mode = 2
 placeholder_text = ".test.gd"
 
-[node name="SuiteExcludeGroup" type="VBoxContainer" parent="Layout/View/HSplit/Config/VBox" unique_id=1971302379]
+[node name="SuiteExcludeGroup" type="VBoxContainer" parent="Layout/View/HSplit/Config/ScrollContainer/VBox" unique_id=1971302379]
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="Label" type="Label" parent="Layout/View/HSplit/Config/VBox/SuiteExcludeGroup" unique_id=1668321263]
+[node name="Label" type="Label" parent="Layout/View/HSplit/Config/ScrollContainer/VBox/SuiteExcludeGroup" unique_id=1668321263]
 layout_mode = 2
 text = "exclude paths containing (separate patterns with | )"
 
-[node name="SuiteExcludeEdit" type="LineEdit" parent="Layout/View/HSplit/Config/VBox/SuiteExcludeGroup" unique_id=1372833891]
+[node name="SuiteExcludeEdit" type="LineEdit" parent="Layout/View/HSplit/Config/ScrollContainer/VBox/SuiteExcludeGroup" unique_id=1372833891]
 custom_minimum_size = Vector2(125, 0)
 layout_mode = 2
 text = "/addons/"
 placeholder_text = "[no exclusion]"
 
-[node name="CaseMatchGroup" type="VBoxContainer" parent="Layout/View/HSplit/Config/VBox" unique_id=656286953]
+[node name="CaseMatchGroup" type="VBoxContainer" parent="Layout/View/HSplit/Config/ScrollContainer/VBox" unique_id=656286953]
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="Label" type="Label" parent="Layout/View/HSplit/Config/VBox/CaseMatchGroup" unique_id=21512929]
+[node name="Label" type="Label" parent="Layout/View/HSplit/Config/ScrollContainer/VBox/CaseMatchGroup" unique_id=21512929]
 layout_mode = 2
 text = "case match (methods) (use * for any suite of characters)"
 
-[node name="CaseMatchEdit" type="LineEdit" parent="Layout/View/HSplit/Config/VBox/CaseMatchGroup" unique_id=110317822]
+[node name="CaseMatchEdit" type="LineEdit" parent="Layout/View/HSplit/Config/ScrollContainer/VBox/CaseMatchGroup" unique_id=110317822]
 custom_minimum_size = Vector2(125, 0)
 layout_mode = 2
 placeholder_text = "it_*"
@@ -259,4 +275,5 @@ placeholder_text = "it_*"
 [connection signal="pressed" from="Layout/ToolBox/RunAllButton" to="." method="_on_run_all_button_pressed"]
 [connection signal="pressed" from="Layout/ToolBox/ReloadButton" to="." method="_on_reload_button_pressed"]
 [connection signal="tab_changed" from="Layout/ToolBox/TabBar" to="." method="_on_tab_bar_tab_changed"]
+[connection signal="button_clicked" from="Layout/View/HSplit/TestTree/Tree" to="." method="_on_tree_button_clicked"]
 [connection signal="cell_selected" from="Layout/View/HSplit/TestTree/Tree" to="." method="_on_tree_cell_selected"]

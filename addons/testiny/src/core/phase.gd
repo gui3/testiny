@@ -17,15 +17,23 @@ var recorder: Recorder
 var status: Constant.Status = Constant.Status.INIT
 var is_done: bool = false
 var is_cancelled: bool = false
+var locator: String # suite_path//method_name
+var suite_path: String
+var method_name: String
 
 func _init(
 	p_description: String,
 	p_config: Config,
+	p_suite_path: String,
+	p_method_name: String = ""
 ) -> void:
 	set_status(Constant.Status.INIT)
 	recorder = Recorder.new()
 	description = p_description
 	config = p_config
+	suite_path = p_suite_path
+	method_name = p_method_name
+	locator = "%s//%s" % [suite_path, method_name]
 
 @abstract func _run() -> void;
 @abstract func _load() -> void;
