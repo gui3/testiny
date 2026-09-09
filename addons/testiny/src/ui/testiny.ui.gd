@@ -226,6 +226,7 @@ func refresh_details()  -> void:
 	show_details(phase)
 
 func _on_run_all_button_pressed() -> void:
+	$Layout/ToolBox/FilterSection/LineEdit.text = ""
 	_run()
 
 
