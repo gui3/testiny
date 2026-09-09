@@ -35,9 +35,7 @@ func get_cases() -> void:
 					var case := Case.new(method.name, config, suite_path, method.name)
 					cases.append(case)
 					if case.locator.match("*%s*" % config.filter):
-						add_child(case)
 						case._load()
-						#case.ended.connect(update_status)
 					else:
 						case.is_done = true
 						case.set_status(Constant.Status.IGNORED)

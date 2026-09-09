@@ -3,5 +3,5 @@
 
 # see res://bundle.config.gd for replacements
 const NAME: String = "Testiny"
-const VERSION: String = "0.2.0"
+const VERSION: String = "0.2.1"
 const BRIEF: String = "Foresee bugs and crashes!"

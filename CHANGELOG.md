@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - 2026-09-08
 
+### Fixed
+
+- fixed non blocking error messages
+  (duplicate calls to add_child)
+
+## [0.2.0] - 2026-09-08
+
 ### Added
 
 - filtering the test cases executed
@@ -17,10 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- OS crash (on linux KDE Neon) when closing:
+- fixed OS crash (on linux KDE Neon) when closing:
   sub_process now quits gracefully before the plugin closes.
   (was due to a duplicate kill call on the sub process)
-- wrong icons for CANCELLED and IGNORED statuses
+- fixed wrong icons for CANCELLED and IGNORED statuses
 
 ### Changed
 
