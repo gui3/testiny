@@ -129,12 +129,13 @@ func read_stderr(stderr: FileAccess) -> void:
 func terminate() -> void:
 	mutex.lock()
 	set_process(false)
-	is_done = true
-	exit_code = OS.get_process_exit_code(pid)
+	if pid >= 0:
+		exit_code = OS.get_process_exit_code(pid)
 	#_self_reference = null
 	mutex.unlock()
-	if OS.is_process_running(pid):
+	if pid >= 0 and OS.is_process_running(pid):
 		OS.kill(pid)
+	is_done = true
 	exited.emit.call_deferred(exit_code)
 
 ## OVERRIDE ensures that [method terminate] is called
@@ -142,5 +143,5 @@ func terminate() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_EXIT_TREE or what == NOTIFICATION_PREDELETE:
 		terminate()
-		if OS.is_process_running(pid):
+		if not is_done:
 			await exited

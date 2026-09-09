@@ -134,7 +134,7 @@ tab_1/tooltip = "Configure Testiny"
 [node name="TitleButton" type="Button" parent="Layout/ToolBox" unique_id=2016583676]
 layout_mode = 2
 text = "Testiny
-v__APP_VERSION__"
+v0.2.1"
 flat = true
 alignment = 2
 
